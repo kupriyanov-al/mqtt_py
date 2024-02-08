@@ -8,7 +8,7 @@ from paho.mqtt import client as mqtt_client
 
 broker = 'test.mosquitto.org'
 port = 1883
-topic = "rasp"
+topic = "topic_name"
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 
@@ -34,8 +34,7 @@ def subscribe(client: mqtt_client):
         m_in=json.loads(m_decode)
         print(m_in["temperatura"])
         
-        
-    client.subscribe(topic)
+    client.subscribe(topic, qos=1)
     client.on_message = on_message
 
 

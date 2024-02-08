@@ -3,6 +3,7 @@
 import random
 import json
 import time, datetime
+from threading import Thread
 from paho.mqtt import client as mqtt_client
 
 
@@ -18,7 +19,7 @@ def connect_mqtt() -> mqtt_client:
     
     def on_connect(client, userdata, flags, rc):
         print(f"on_connect flags={flags} , rc={rc}")
-        
+
         if rc == 0:
             print("Connected to MQTT Broker!")
             client.connected_flag = True
@@ -38,12 +39,12 @@ def connect_mqtt() -> mqtt_client:
             except:
               print("Disconnected")
         else:
-         print("Disconnected successfully")
-        
+            print("Disconnected successfully")
             
   
-    client = mqtt_client.Client(client_id, clean_session=False)
 
+    client = mqtt_client.Client(client_id)
+    
     client.connected_flag = True
     # client.reconnect_delay_set(min_delay=1, max_delay=120)
     # client.reconnect_max_delay_set(maximum_delay=300)
@@ -51,10 +52,9 @@ def connect_mqtt() -> mqtt_client:
     client.on_connect = on_connect
     client.on_publish = on_publish
     client.on_disconnect = on_disconnect
-    client.connect(broker, port)  # 
+    client.connect(broker, port, 25)  # 25сек жизнь соединения
     
     return client
-
 
 
 def publish(client):
@@ -62,7 +62,7 @@ def publish(client):
     temp = random.randint(20, 30)
     
     while True:
-        time.sleep(10)
+        time.sleep(100)
         msg = {"datastamp": datetime.datetime.now().strftime('%m.%d.%Y %H:%M:%S'),  "temperatura":temp,  "vent": "On"}
         msg = json.dumps(msg)
         
@@ -80,17 +80,17 @@ def publish(client):
                 client.reconnect()
             except:
                 print("Disconnected ll")
-            
+ 
+     
 def run():
     client = connect_mqtt()
-    try:
-        client.loop_start()
-        # client.loop_forever()
-        publish(client)
-    except:
-        print("ОШИБКА loop_start")
+    # publish(client)
     
 
+    thread1 = Thread(target=publish, args = (client,))
+    thread1.start()
+    client.loop_start()
+    thread1.join()
 
 if __name__ == '__main__':
     run()
