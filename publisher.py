@@ -81,11 +81,12 @@ def publish(client):
                     print(f"Отправлено сообщение `{msg}` to topic `{topic}`") 
                 else:
                     print(f"Failed to send message to topic {topic}")
+                time.sleep(0.5)
         else:
             try:
                 client.reconnect()
             except:
-                print("Disconnected ll")
+                print("reconnect error...")
             
 def run():
     client = connect_mqtt()

@@ -17,6 +17,7 @@ def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT Broker!")
+            subscribe(client)
         else:
             print("Failed to connect, return code %d\n", rc)
     
@@ -25,15 +26,15 @@ def connect_mqtt() -> mqtt_client:
             print("Connected to MQTT Broker!")
         else:
             print("Failed to connect, return code %d\n", rc)
-            try:
-                client.reconnect()
-            except:
-                print("disconect")
+            # try:
+            #     client.reconnect()
+            # except:
+            #     print("disconect")
             
 
     client = mqtt_client.Client(client_id)
     client.on_connect = on_connect
-    client.on_disconnect = on_disconnect
+    # client.on_disconnect = on_disconnect
     client.connect(broker, port)
     return client
 
@@ -44,7 +45,7 @@ def subscribe(client: mqtt_client):
 
         m_decode=str(msg.payload.decode())
         m_in=json.loads(m_decode)
-        print(m_in["temperatura"])
+        # print(m_in["temperatura"])
         
     client.subscribe(topic, qos=2)
     client.on_message = on_message
@@ -52,9 +53,9 @@ def subscribe(client: mqtt_client):
 
 def run():
     client = connect_mqtt()
-    subscribe(client)
+    
     client.loop_forever()
-
+    # client.loop_start()
 
 if __name__ == '__main__':
     run()

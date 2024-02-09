@@ -5,7 +5,9 @@ import json
 import time, datetime
 from threading import Thread
 from paho.mqtt import client as mqtt_client
+import queue
 
+q = queue.Queue()
 
 
 broker = 'test.mosquitto.org'
@@ -62,24 +64,27 @@ def publish(client):
     temp = random.randint(20, 30)
     
     while True:
-        time.sleep(100)
+        time.sleep(10)
         msg = {"datastamp": datetime.datetime.now().strftime('%m.%d.%Y %H:%M:%S'),  "temperatura":temp,  "vent": "On"}
         msg = json.dumps(msg)
-        
+        q.put(msg)
         print(f"connected_flag={client.connected_flag}")
         
         if client.connected_flag:
-            result = client.publish(topic, msg, qos=1)
-            status = result[0]
-            if status == 0:
-                print(f"Отправлено сообщение `{msg}` to topic `{topic}`") 
-            else:
-                print(f"Failed to send message to topic {topic}")
+            while not q.empty():
+                msg = q.get()
+                result = client.publish(topic, msg, qos=1)
+                status = result[0]
+                if status == 0:
+                    print(f"Отправлено сообщение `{msg}` to topic `{topic}`")
+                else:
+                    print(f"Failed to send message to topic {topic}")
+                time.sleep(0.5)
         else:
             try:
                 client.reconnect()
             except:
-                print("Disconnected ll")
+                print("reconnect error...")
  
      
 def run():
