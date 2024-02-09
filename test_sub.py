@@ -47,7 +47,7 @@ def subscribe(client: mqtt_client):
         m_in=json.loads(m_decode)
         # print(m_in["temperatura"])
         
-    client.subscribe(topic, qos=2)
+    client.subscribe(topic, qos=1)
     client.on_message = on_message
 
 
